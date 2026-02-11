@@ -63,22 +63,11 @@ class DownloadCourse:
         print(f"📦 Module: {module.name}")
         for item in module.get_module_items():
   
-          # print(item.type)
-          # print(item)
-          # print("-----------")
-  
           if item.type == "ExternalUrl":   #append external urls to txt file
             with open("./Modules/external_links.txt", "a", encoding="utf-8") as f:
               line = f"{module.name} - {item.title}: {item.external_url}\n"
               f.write(line)
               print(f"📝 Saved: {line.strip()}")
-  
-          # elif item.type == "Page":
-          #   page = course.get_page(item.page_url)
-          #   page_title = page.title.replace("/", "-")
-          #   with open(f"./Modules/{page_title}.html", "w", encoding="utf-8") as f:
-          #       f.write(page.body)
-          #   print(f"  📄 Saved page: {page_title}.html")
   
           elif item.type == "File":
             file_obj = self.course.get_file(item.content_id)  # get the file using ID
@@ -183,34 +172,6 @@ class DownloadCourse:
   def getTabs(self):
     tabs = self.course.get_tabs()
     print(tabs)
-#TODO: doesn't work
-# def downloadQuizzes():
-#   for quiz in course.get_quizzes():
-#     print("Title:", quiz.title)
-#     print("Description:", quiz.description)
-#     print("Time limit:", quiz.time_limit)
-#     print("Due at:", quiz.due_at)
-#     print("URL:", quiz.html_url)
-#     #print(dir(quiz))
-
-#     questions = quiz.get_questions().__iter__()
-
-#     print(dir(questions))
-
-#     #print(dir(questions))
-#     # for q in questions:
-#     #   print(" Question:", q.question_text)
-#     #   if hasattr(q, "answers"):  
-#     #       print("Options:")
-#     #       for option in q.answers:
-#     #           print(" -", option["text"])
-
-
-
-
-
-#TODO: GET A LIST OF EVERY TAB EACH COURSE HAS 
-
 
   
 
@@ -220,13 +181,11 @@ class DownloadCourse:
 
 
 #- - - - - -RUN PROGRAM - - - - - - - - - - - -  - - - - - -
+if __name__ == "__main__":
+  courseToDownload = DownloadCourse(API_URL, API_TOKEN, COURSE_ID)
 
-
-courseToDownload = DownloadCourse(API_URL, API_TOKEN, COURSE_ID)
-
-
-# courseToDownload.downloadModules()     #download modules 
-# courseToDownload.downloadFiles() #download files
+  # courseToDownload.downloadModules()     #download modules 
+  # courseToDownload.downloadFiles() #download files
 
 
 
