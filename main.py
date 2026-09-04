@@ -10,36 +10,36 @@ from course_vars import CANVAS_URL,API_TOKEN,COURSE_ID
 class DownloadCourse:
   def __init__(self,CANVAS_URL,API_TOKEN,COURSE_ID):
     self.canvas = Canvas(CANVAS_URL, API_TOKEN)
-    self.course = self.canvas.get_course(COURSE_ID)  #put course_id here
+    self.course = self.canvas.get_course(COURSE_ID) 
 
-  #make new directory of whatever name
+  #make new directory
   def makeDir(self,dirName):
     os.makedirs(dirName, exist_ok=True)
   
   
-  #dedicated func to download vids.   normal canvas api provided .download() takes too long.    (much faster) 
+  #download vids.  this way much faster than canvas api .download() 
   def downloadVids(self,url, fileName, savedPath):
     with requests.get(url, stream=True) as r:
-        r.raise_for_status()  # Raise an error if the download failed
-  
-        saveToPath = str(savedPath) + "/" + str(fileName)
-        with open(saveToPath, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=8192):
-                if chunk:  # Filter out keep-alive chunks
-                    f.write(chunk)
+      r.raise_for_status()  # raise error if download failed
+
+      saveToPath = str(savedPath) + "/" + str(fileName)
+      with open(saveToPath, 'wb') as f:
+        for chunk in r.iter_content(chunk_size=8192):
+          if chunk:  # filter out keep-alive chunks
+              f.write(chunk)
   
     print(f"Download complete: {savedPath}")
 
 
-  #download all content in 'Files' canvas tab
+  #download all content in Canvas 'Files' tab
   def downloadFiles(self):
-    self.makeDir("Files")   #make 'Files' directory
+    self.makeDir("Files")   #make 'Files' dir
     
     try:
       for file in self.course.get_files():
   
         strFile = str(file)
-        if ".mov" in strFile or ".mp4" in strFile:   #skip .mov and .mp4 takes too long         #TODO: if .mp3 file also add that 
+        if ".mov" in strFile or ".mp4" in strFile:   #skip .mov and .mp4 takes too long         #TODO: add .mp3 file support 
           print(file.url)
           self.downloadVids(file.url, file, "./Files") #downloads vids faster
           continue 
@@ -51,44 +51,41 @@ class DownloadCourse:
     except Exception as e:
       print(f"'No permission for 'Files'tab : {e}")
   
-
-  #download stuff in modules tab
+  #download all content in Canvas 'Modules' tab
   def downloadModules(self):
-    self.makeDir("Modules")   #make dir 'Modules'
+    self.makeDir("Modules")   #make 'Modules' dir
   
-    for module in self.course.get_modules(): #go through all moduels 
-        print(f"📦 Module: {module.name}")
-        for item in module.get_module_items():
-  
-          if item.type == "ExternalUrl":   #append external urls to txt file
-            with open("./Modules/external_links.txt", "a", encoding="utf-8") as f:
-              line = f"{module.name} - {item.title}: {item.external_url}\n"
-              f.write(line)
-              print(f"📝 Saved: {line.strip()}")
-  
-          elif item.type == "File":
-            file_obj = self.course.get_file(item.content_id)  # get the file using ID
-            print(f"⬇️ Downloading: {file_obj.filename}")
-            downloadPath = "./Modules/{}".format(file_obj.filename)
-            file_obj.download(downloadPath)
+    for module in self.course.get_modules(): #go through all modules 
+      print(f"📦 Module: {module.name}")
+      for item in module.get_module_items():
 
+        if item.type == "ExternalUrl":   #append external urls to txt file
+          with open("./Modules/external_links.txt", "a", encoding="utf-8") as f:
+            line = f"{module.name} - {item.title}: {item.external_url}\n"
+            f.write(line)
+            print(f"📝 Saved: {line.strip()}")
 
+        elif item.type == "File":
+          file_obj = self.course.get_file(item.content_id)  # get the file using ID
+          print(f"⬇️ Downloading: {file_obj.filename}")
+          downloadPath = "./Modules/{}".format(file_obj.filename)
+          file_obj.download(downloadPath)
 
-  #download content from 'Assignments' canvas tab
+  #download all content in Canvas 'Assignments' tab
   def downloadAssignments(self):
-    self.makeDir("Assignments")   #make dir 'Modules'
+    self.makeDir("Assignments")  #make 'Assignments' dir
   
     for assignment in self.course.get_assignments():
-        title = assignment.name.replace("/", "-")  # clean filename
-  
-        fileName = f"./Assignments/{title}.html"
-        try:
-            html = assignment.description or "<!-- No description -->"
-            with open(fileName, "w", encoding="utf-8") as f:
-                f.write(str(assignment.get_submission))
-            print(f"✅ Saved: {fileName}")
-        except Exception as e:
-            print(f"❌ Failed to save {title}: {e}")
+      title = assignment.name.replace("/", "-")  # clean filename
+
+      fileName = f"./Assignments/{title}.html"
+      try:
+        html = assignment.description or "<!-- No description -->"
+        with open(fileName, "w", encoding="utf-8") as f:
+            f.write(str(assignment.get_submission))
+        print(f"✅ Saved: {fileName}")
+      except Exception as e:
+        print(f"❌ Failed to save {title}: {e}")
   
   
 
@@ -125,9 +122,7 @@ class DownloadCourse:
   #can download 'Pages' content in depth 
   def downloadPages(self):
   
-    self.makeDir("Pages")   #make dir 'Pages'
-
-  
+    self.makeDir("Pages")   #make 'Pages' dir
   
     for page in self.course.get_pages():  #get all pages
         page_obj = self.course.get_page(page.url) # load full content of associated page 
@@ -167,17 +162,12 @@ class DownloadCourse:
                 print(f"⚠️ Couldn't download file {fileID}: {e}")
   
 
-  #doesnt work rn. modify later. see which tabs in specifc course available
+  #doesnt work rn. modify later. see which tabs in specific course available
   def getTabs(self):
     tabs = self.course.get_tabs()
     print(tabs)
 
   
-
-
-
-
-
 
 #- - - - - -RUN PROGRAM - - - - - - - - - - - -  - - - - - -
 if __name__ == "__main__":
