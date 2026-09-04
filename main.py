@@ -4,15 +4,12 @@ import requests
 from bs4 import BeautifulSoup
 import re
 from pathlib import Path
+from course_vars import CANVAS_URL,API_TOKEN,COURSE_ID
 
-
-API_URL = "https://bruinlearn.ucla.edu"
-API_TOKEN = ""   #REPLACE: api_token goes here
-COURSE_ID = 1    #REPLACE: int courseID num goes here 
 
 class DownloadCourse:
-  def __init__(self,API_URL,API_TOKEN,COURSE_ID):
-    self.canvas = Canvas(API_URL, API_TOKEN)
+  def __init__(self,CANVAS_URL,API_TOKEN,COURSE_ID):
+    self.canvas = Canvas(CANVAS_URL, API_TOKEN)
     self.course = self.canvas.get_course(COURSE_ID)  #put course_id here
 
   #make new directory of whatever name
@@ -129,6 +126,8 @@ class DownloadCourse:
   def downloadPages(self):
   
     self.makeDir("Pages")   #make dir 'Pages'
+
+  
   
     for page in self.course.get_pages():  #get all pages
         page_obj = self.course.get_page(page.url) # load full content of associated page 
@@ -182,7 +181,9 @@ class DownloadCourse:
 
 #- - - - - -RUN PROGRAM - - - - - - - - - - - -  - - - - - -
 if __name__ == "__main__":
-  courseToDownload = DownloadCourse(API_URL, API_TOKEN, COURSE_ID)
+  courseToDownload = DownloadCourse(CANVAS_URL, API_TOKEN, COURSE_ID)
 
-  # courseToDownload.downloadModules()     #download modules 
-  # courseToDownload.downloadFiles() #download files
+  courseToDownload.downloadModules()     #download modules   #9/3/26 note: modules still works great
+  #courseToDownload.downloadFiles() #download files
+  #courseToDownload.downloadPages()
+
