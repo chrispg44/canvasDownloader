@@ -1,6 +1,6 @@
 # Canvas Downloader
 
-Canvas Downloader is for downloading course content from a Canvas based course. It works with any school that uses Canvas.
+For downloading course content from a Canvas based course. It works with any school that uses Canvas.
 
 What it does
 - Able to download everything in the 'Modules', 'Files', and 'Assignments' tab 
