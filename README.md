@@ -16,9 +16,9 @@ Example `course_vars.py` — you must set these values:
 
 ```python
 # REPLACE with your school Canvas homepage URL, API token, and course ID
-CANVAS_URL = "https://bruinlearn.ucla.edu" #REPLACE: with canvas homepage url (string) -  Ex: UCLA canvas url used here 
-API_TOKEN = ""   #REPLACE: api_token goes here (string)
-COURSE_ID = 1   #REPLACE: courseID goes here (int) - found in web browser URL of course to download (CANVAS_URL/{some_number_here} )
+CANVAS_URL = "https://bruinlearn.ucla.edu" #UCLA canvas url used here (string)
+API_TOKEN = ""   #(string)
+COURSE_ID = 1   #found in web browser URL of course to download (CANVAS_URL/{some_number_here} - (int)
 ```
 
 Usage
