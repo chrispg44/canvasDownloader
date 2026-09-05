@@ -23,7 +23,7 @@ COURSE_ID = 1   #found in web browser URL of course to download (CANVAS_URL/{som
 
 Usage
 1. Set all 3 values in `course_vars.py`
-2. Run the script:
+2. Run the script (and the created folder(s) will be placed in current directory):
 
 ```bash
 python3 main.py
