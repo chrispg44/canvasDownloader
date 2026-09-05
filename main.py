@@ -54,38 +54,45 @@ class DownloadCourse:
   #download all content in Canvas 'Modules' tab
   def downloadModules(self):
     self.makeDir("Modules")   #make 'Modules' dir
-  
-    for module in self.course.get_modules(): #go through all modules 
-      print(f"📦 Module: {module.name}")
-      for item in module.get_module_items():
 
-        if item.type == "ExternalUrl":   #append external urls to txt file
-          with open("./Modules/external_links.txt", "a", encoding="utf-8") as f:
-            line = f"{module.name} - {item.title}: {item.external_url}\n"
-            f.write(line)
-            print(f"📝 Saved: {line.strip()}")
+    try:
+      for module in self.course.get_modules(): #go through all modules 
+        print(f"📦 Module: {module.name}")
+        for item in module.get_module_items():
 
-        elif item.type == "File":
-          file_obj = self.course.get_file(item.content_id)  # get the file using ID
-          print(f"⬇️ Downloading: {file_obj.filename}")
-          downloadPath = "./Modules/{}".format(file_obj.filename)
-          file_obj.download(downloadPath)
+          if item.type == "ExternalUrl":   #append external urls to txt file
+            with open("./Modules/external_links.txt", "a", encoding="utf-8") as f:
+              line = f"{module.name} - {item.title}: {item.external_url}\n"
+              f.write(line)
+              print(f"📝 Saved: {line.strip()}")
+
+          elif item.type == "File":
+            file_obj = self.course.get_file(item.content_id)  # get the file using ID
+            print(f"⬇️ Downloading: {file_obj.filename}")
+            downloadPath = "./Modules/{}".format(file_obj.filename)
+            file_obj.download(downloadPath)
+    except Exception as e:
+      print(f"'Likely no student permission for 'Modules'tab : {e}")
 
   #download all content in Canvas 'Assignments' tab
   def downloadAssignments(self):
     self.makeDir("Assignments")  #make 'Assignments' dir
-  
-    for assignment in self.course.get_assignments():
-      title = assignment.name.replace("/", "-")  # clean filename
 
-      fileName = f"./Assignments/{title}.html"
-      try:
-        html = assignment.description or "<!-- No description -->"
-        with open(fileName, "w", encoding="utf-8") as f:
-            f.write(str(assignment.get_submission))
-        print(f"✅ Saved: {fileName}")
-      except Exception as e:
-        print(f"❌ Failed to save {title}: {e}")
+    try:
+      for assignment in self.course.get_assignments():
+        title = assignment.name.replace("/", "-")  # clean filename
+
+        fileName = f"./Assignments/{title}.html"
+        try:
+          html = assignment.description or "<!-- No description -->"
+          with open(fileName, "w", encoding="utf-8") as f:
+              f.write(str(assignment.get_submission))
+          print(f"✅ Saved: {fileName}")
+        except Exception as e:
+          print(f"❌ Failed to save {title}: {e}")
+
+    except Exception as e:
+      print(f"'Likely no student permission for 'Assignments'tab : {e}")
   
   
 
@@ -123,43 +130,47 @@ class DownloadCourse:
   def downloadPages(self):
   
     self.makeDir("Pages")   #make 'Pages' dir
-  
-    for page in self.course.get_pages():  #get all pages
-        page_obj = self.course.get_page(page.url) # load full content of associated page 
-        title = page.title.replace("/", "-")    #don't confuse file with path name
-        #downloadPath = "./Pages/{}".format(title)
-        Path(f"Pages/{title}").mkdir(exist_ok=True)
-  
-        self.downloadGenericHTMLPages(page_obj,title)
-  
-  
-        #download all content within each page (in depth)
-        soup = BeautifulSoup(page_obj.body, "html.parser")
-  
-        for a_tag in soup.find_all("a", href=True):
-            href = a_tag["href"]
-  
-            urlStr = str(href)
+
+    try:
+      for page in self.course.get_pages():  #get all pages
+          page_obj = self.course.get_page(page.url) # load full content of associated page 
+          title = page.title.replace("/", "-")    #don't confuse file with path name
+          #downloadPath = "./Pages/{}".format(title)
+          Path(f"Pages/{title}").mkdir(exist_ok=True)
     
-            #format: https://lever.cs.ucla.edu/[professor]/[class]/Lecturex.mp4
-            if urlStr.endswith(".mp4"): #download lectures (may take a few min)
-              vidName = self.getVidName(urlStr)
-              self.downloadVids(href, vidName, f"Pages/{title}")
-              continue
-  
+          self.downloadGenericHTMLPages(page_obj,title)
+    
+    
+          #download all content within each page (in depth)
+          soup = BeautifulSoup(page_obj.body, "html.parser")
+    
+          for a_tag in soup.find_all("a", href=True):
+              href = a_tag["href"]
+    
+              urlStr = str(href)
+      
+              #format: https://lever.cs.ucla.edu/[professor]/[class]/Lecturex.mp4
+              if urlStr.endswith(".mp4"): #download lectures (may take a few min)
+                vidName = self.getVidName(urlStr)
+                self.downloadVids(href, vidName, f"Pages/{title}")
+                continue
+    
+              
+              fileID = self.urlToID(href)    #convert url to id
+              if fileID is None:
+                continue
+              #get all pdfs 
+              try:
+                  file = self.course.get_file(fileID)
+                  if file.filename.endswith(".pdf"):
+                      print(f"⬇️ Downloading {file.filename} from page {title}")
+                      file.download(f"Pages/{title}/{file.filename}")
             
-            fileID = self.urlToID(href)    #convert url to id
-            if fileID is None:
-              continue
-            #get all pdfs 
-            try:
-                file = self.course.get_file(fileID)
-                if file.filename.endswith(".pdf"):
-                    print(f"⬇️ Downloading {file.filename} from page {title}")
-                    file.download(f"Pages/{title}/{file.filename}")
-          
-            except Exception as e:
-                print(f"⚠️ Couldn't download file {fileID}: {e}")
+              except Exception as e:
+                  print(f"⚠️ Couldn't download file {fileID}: {e}")
+
+    except Exception as e:
+      print(f"'Likely no student permission for 'Pages'tab : {e}")
   
 
   #doesnt work rn. modify later. see which tabs in specific course available
